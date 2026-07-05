@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urbanhello-remi-api"
+version = "0.1.0"
+description = "Async Python wrapper for the UrbanHello Rémi API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Home Assistant French Ecosystem"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Home Automation",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: AsyncIO",
+]
+dependencies = ["aiohttp>=3.9"]
+
+[project.urls]
+Homepage = "https://github.com/homeassistant-fr-ecosystem/urbanhello-remi-api"
+Repository = "https://github.com/homeassistant-fr-ecosystem/urbanhello-remi-api"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "aioresponses>=0.7",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["urbanhello_remi_api*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "C4", "EM", "ISC", "PIE", "Q", "RET", "SIM", "RUF"]
+ignore = ["E501", "ISC001"]
+
+[tool.mypy]
+python_version = "3.12"
+show_error_codes = true
+ignore_missing_imports = true
+strict_optional = true
+warn_redundant_casts = true
+check_untyped_defs = true
