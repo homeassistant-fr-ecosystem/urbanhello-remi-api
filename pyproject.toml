@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Async Python wrapper for the UrbanHello Rémi API"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = {text = "GPL-3.0-or-later"}
 authors = [
     {name = "Home Assistant French Ecosystem"}
 ]
