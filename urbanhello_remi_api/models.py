@@ -1,3 +1,5 @@
+"""Data models for the UrbanHello Rémi API."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -14,11 +16,14 @@ class RemiAPIAuthError(RemiAPIError):
 
 @dataclass
 class Face:
+    """Represents a Rémi display face."""
+
     object_id: str
     name: str
 
     @classmethod
-    def _from_dict(cls, data: dict[str, Any]) -> Face:
+    def from_dict(cls, data: dict[str, Any]) -> Face:
+        """Construct a Face from a Parse API dict."""
         return cls(
             object_id=data.get("objectId", ""),
             name=data.get("name", ""),
@@ -26,7 +31,9 @@ class Face:
 
 
 @dataclass
-class RemiDevice:
+class RemiDevice:  # pylint: disable=too-many-instance-attributes
+    """Represents a physical Rémi baby-monitor device."""
+
     object_id: str
     name: str
     temperature: float | None
@@ -39,7 +46,8 @@ class RemiDevice:
     raw: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def _from_dict(cls, data: dict[str, Any], faces_by_id: dict[str, str]) -> RemiDevice:
+    def from_dict(cls, data: dict[str, Any], faces_by_id: dict[str, str]) -> RemiDevice:
+        """Construct a RemiDevice from a Parse API dict."""
         raw_temp = data.get("temp")
         temperature = (raw_temp + 40) if raw_temp is not None else None
 
@@ -66,7 +74,9 @@ class RemiDevice:
 
 
 @dataclass
-class Alarm:
+class Alarm:  # pylint: disable=too-many-instance-attributes
+    """Represents a scheduled alarm on a Rémi device."""
+
     object_id: str
     name: str
     time: str
@@ -81,7 +91,8 @@ class Alarm:
     lightnight: list[int]
 
     @classmethod
-    def _from_dict(cls, data: dict[str, Any], faces_by_id: dict[str, str]) -> Alarm:
+    def from_dict(cls, data: dict[str, Any], faces_by_id: dict[str, str]) -> Alarm:
+        """Construct an Alarm from a Parse API dict."""
         event_time = data.get("event_time", [0, 0])
         time_str = (
             f"{event_time[0]:02d}:{event_time[1]:02d}"

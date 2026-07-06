@@ -1,7 +1,10 @@
+# pylint: disable=duplicate-code
+"""Tests for the RemiAPI high-level wrapper."""
+
 from __future__ import annotations
+
 import pytest
-from aioresponses import aioresponses
-from urbanhello_remi_api.api import RemiAPI
+
 from urbanhello_remi_api.models import Alarm, Face, RemiAPIError, RemiDevice
 
 BASE_URL = "https://remi2.urbanhello.com/parse"
@@ -47,18 +50,8 @@ ALARM_RESPONSE = {
 }
 
 
-@pytest.fixture
-def mock_aiohttp():
-    with aioresponses() as m:
-        yield m
-
-
-@pytest.fixture
-def api():
-    return RemiAPI("user@example.com", "password", cache_duration=60)
-
-
 async def test_login_populates_remis(api, mock_aiohttp):
+    """Login should populate remis from the login response."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     await api.login()
@@ -67,6 +60,7 @@ async def test_login_populates_remis(api, mock_aiohttp):
 
 
 async def test_list_devices_returns_remi_device(api, mock_aiohttp):
+    """list_devices should return typed RemiDevice objects."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.get(
@@ -82,6 +76,7 @@ async def test_list_devices_returns_remi_device(api, mock_aiohttp):
 
 
 async def test_get_device_returns_remi_device(api, mock_aiohttp):
+    """get_device should return a fully populated RemiDevice."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Remi/remi1", payload=REMI_RESPONSE)
@@ -93,6 +88,7 @@ async def test_get_device_returns_remi_device(api, mock_aiohttp):
 
 
 async def test_get_device_uses_cache(api, mock_aiohttp):
+    """Second get_device call should hit cache without a new HTTP request."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Remi/remi1", payload=REMI_RESPONSE)
@@ -104,6 +100,7 @@ async def test_get_device_uses_cache(api, mock_aiohttp):
 
 
 async def test_set_brightness_sends_put(api, mock_aiohttp):
+    """set_brightness should issue a PUT to the device endpoint."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.put(f"{BASE_URL}/classes/Remi/remi1", payload={"updatedAt": "2024"})
@@ -112,6 +109,7 @@ async def test_set_brightness_sends_put(api, mock_aiohttp):
 
 
 async def test_set_brightness_invalidates_cache(api, mock_aiohttp):
+    """set_brightness should invalidate the device cache so next fetch is fresh."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Remi/remi1", payload=REMI_RESPONSE)
@@ -125,6 +123,7 @@ async def test_set_brightness_invalidates_cache(api, mock_aiohttp):
 
 
 async def test_list_faces_returns_face_objects(api, mock_aiohttp):
+    """list_faces should return typed Face objects."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     await api.login()
@@ -135,6 +134,7 @@ async def test_list_faces_returns_face_objects(api, mock_aiohttp):
 
 
 async def test_get_alarms_returns_alarm_objects(api, mock_aiohttp):
+    """get_alarms should return typed Alarm objects with converted fields."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Event", payload=ALARM_RESPONSE)
@@ -147,11 +147,17 @@ async def test_get_alarms_returns_alarm_objects(api, mock_aiohttp):
 
 
 async def test_create_alarm_returns_alarm(api, mock_aiohttp):
+    """create_alarm should post to the Event class and return an Alarm."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.post(
         f"{BASE_URL}/classes/Event",
-        payload={"objectId": "alarm2", "event_time": [8, 0], "enabled": True, "recurrence": [1]*7},
+        payload={
+            "objectId": "alarm2",
+            "event_time": [8, 0],
+            "enabled": True,
+            "recurrence": [1] * 7,
+        },
     )
     await api.login()
     alarm = await api.create_alarm("remi1", "08:00")
@@ -160,6 +166,7 @@ async def test_create_alarm_returns_alarm(api, mock_aiohttp):
 
 
 async def test_delete_alarm_returns_true(api, mock_aiohttp):
+    """delete_alarm should return True on success."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.delete(f"{BASE_URL}/classes/Event/alarm1", payload={})
@@ -169,6 +176,7 @@ async def test_delete_alarm_returns_true(api, mock_aiohttp):
 
 
 async def test_turn_on_uses_sleepy_face(api, mock_aiohttp):
+    """turn_on should set the sleepyFace on the device."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload=LOGIN_RESPONSE)
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload=FACES_RESPONSE)
     mock_aiohttp.put(f"{BASE_URL}/classes/Remi/remi1", payload={"updatedAt": "2024"})
@@ -177,6 +185,7 @@ async def test_turn_on_uses_sleepy_face(api, mock_aiohttp):
 
 
 async def test_turn_on_raises_if_sleepy_face_missing(api, mock_aiohttp):
+    """turn_on should raise RemiAPIError when sleepyFace is not in the face list."""
     mock_aiohttp.post(f"{BASE_URL}/login", payload={"sessionToken": "tok", "remis": []})
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload={"results": []})
     mock_aiohttp.get(f"{BASE_URL}/classes/Face", payload={"results": []})

@@ -1,3 +1,5 @@
+"""Low-level async HTTP client for the UrbanHello Parse backend."""
+
 from __future__ import annotations
 
 import logging
@@ -21,12 +23,14 @@ class ParseClient:
         session: aiohttp.ClientSession | None = None,
         timeout: int = 15,
     ) -> None:
+        """Initialise the client with an optional shared session."""
         self._session = session
         self._timeout = timeout
         self._session_token: str | None = None
 
     @property
     def session_token(self) -> str | None:
+        """Return the current Parse session token, or None if not authenticated."""
         return self._session_token
 
     async def _ensure_session(self) -> aiohttp.ClientSession:
@@ -51,7 +55,7 @@ class ParseClient:
             raise RemiAPIError(f"HTTP {resp.status}: {text}")
         try:
             return await resp.json()
-        except Exception:
+        except (ValueError, aiohttp.ContentTypeError):
             return text
 
     async def request(
@@ -89,9 +93,7 @@ class ParseClient:
                         timeout=timeout_ctrl,
                     ) as resp:
                         return await self._parse_response(resp)
-                except (RemiAPIError, RemiAPIAuthError):
-                    raise
-                except Exception as exc2:
+                except (aiohttp.ClientError, OSError) as exc2:
                     raise RemiAPIError(f"Request failed: {exc2}") from exc2
             raise RemiAPIError(str(exc)) from exc
 
