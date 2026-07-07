@@ -8,7 +8,6 @@ from aioresponses import aioresponses
 from urbanhello_remi_api.api import RemiAPI
 from urbanhello_remi_api.client import ParseClient
 
-
 BASE_URL = "https://remi2.urbanhello.com/parse"
 
 

@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from urbanhello_remi_api.models import Alarm, Face, RemiAPIAuthError, RemiAPIError, RemiDevice
+from urbanhello_remi_api.models import (
+    Alarm,
+    Face,
+    RemiAPIAuthError,
+    RemiAPIError,
+    RemiDevice,
+)
 
 
 def test_face_from_dict():

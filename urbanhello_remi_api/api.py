@@ -121,7 +121,8 @@ class RemiAPI:  # pylint: disable=too-many-public-methods,too-many-instance-attr
             return self._device_cache[object_id]
         data = await self._client.request("GET", f"/classes/Remi/{object_id}")
         if not isinstance(data, dict):
-            raise RemiAPIError("Unexpected response when fetching Remi info")
+            msg = "Unexpected response when fetching Remi info"
+            raise RemiAPIError(msg)
         device = RemiDevice.from_dict(data, self._faces_by_id)
         self._device_cache[object_id] = device
         self._device_cache_expiry[object_id] = time.time() + self._cache_duration
@@ -167,7 +168,8 @@ class RemiAPI:  # pylint: disable=too-many-public-methods,too-many-instance-attr
             await self.list_faces(refresh=True)
             face = self._faces_by_name.get(api_face_name)
         if not face:
-            raise RemiAPIError(f"Unknown face '{api_face_name}'")
+            msg = f"Unknown face '{api_face_name}'"
+            raise RemiAPIError(msg)
         await self._update_device(object_id, {"face": self._pointer("Face", face.object_id)})
 
     async def turn_on(self, object_id: str) -> None:
@@ -255,7 +257,8 @@ class RemiAPI:  # pylint: disable=too-many-public-methods,too-many-instance-attr
                 return Alarm.from_dict(merged, self._faces_by_id)
             except RemiAPIError:
                 continue
-        raise RemiAPIError("Failed to create alarm")
+        msg = "Failed to create alarm"
+        raise RemiAPIError(msg)
 
     async def update_alarm(self, object_id: str, alarm_id: str, **kwargs: Any) -> Alarm:
         """Update an existing alarm."""
@@ -274,7 +277,8 @@ class RemiAPI:  # pylint: disable=too-many-public-methods,too-many-instance-attr
                 return Alarm.from_dict(merged, self._faces_by_id)
             except RemiAPIError:
                 continue
-        raise RemiAPIError(f"Failed to update alarm {alarm_id}")
+        msg = f"Failed to update alarm {alarm_id}"
+        raise RemiAPIError(msg)
 
     async def delete_alarm(self, object_id: str, alarm_id: str) -> bool:
         """Delete an alarm, trying all known classes."""
@@ -307,7 +311,8 @@ class RemiAPI:  # pylint: disable=too-many-public-methods,too-many-instance-attr
         alarms = await self.get_alarms(object_id, refresh=True)
         alarm = next((a for a in alarms if a.object_id == alarm_id), None)
         if not alarm:
-            raise RemiAPIError(f"Alarm {alarm_id} not found")
+            msg = f"Alarm {alarm_id} not found"
+            raise RemiAPIError(msg)
         if alarm.face:
             await self.set_face(object_id, alarm.face.name)
         if alarm.volume:

@@ -50,9 +50,11 @@ class ParseClient:
     async def _parse_response(self, resp: aiohttp.ClientResponse) -> Any:
         text = await resp.text()
         if resp.status == 401:
-            raise RemiAPIAuthError(f"Authentication failed: {text}")
+            msg = f"Authentication failed: {text}"
+            raise RemiAPIAuthError(msg)
         if resp.status >= 400:
-            raise RemiAPIError(f"HTTP {resp.status}: {text}")
+            msg = f"HTTP {resp.status}: {text}"
+            raise RemiAPIError(msg)
         try:
             return await resp.json()
         except (ValueError, aiohttp.ContentTypeError):
@@ -94,7 +96,8 @@ class ParseClient:
                     ) as resp:
                         return await self._parse_response(resp)
                 except (aiohttp.ClientError, OSError) as exc2:
-                    raise RemiAPIError(f"Request failed: {exc2}") from exc2
+                    msg = f"Request failed: {exc2}"
+                    raise RemiAPIError(msg) from exc2
             raise RemiAPIError(str(exc)) from exc
 
     async def login(self, username: str, password: str) -> dict:
@@ -106,10 +109,12 @@ class ParseClient:
             include_session=False,
         )
         if not isinstance(data, dict):
-            raise RemiAPIError("Unexpected response during login")
+            msg = "Unexpected response during login"
+            raise RemiAPIError(msg)
         token = data.get("sessionToken")
         if not token:
-            raise RemiAPIError("Login succeeded but session token was not returned")
+            msg = "Login succeeded but session token was not returned"
+            raise RemiAPIError(msg)
         self._session_token = token
         return data
 
