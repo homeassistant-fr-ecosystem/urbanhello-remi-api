@@ -323,6 +323,11 @@ class RemiAPI:  # pylint: disable=too-many-public-methods,too-many-instance-attr
     # Backward-compat helpers used by HA integration during migration
     # -------------------------------------------------------------------------
 
+    @property
+    def faces(self) -> dict[str, str]:
+        """Deprecated: use list_faces(). Returns name -> objectId for HA compatibility."""
+        return {face.name: face.object_id for face in self._faces_by_name.values()}
+
     async def get_remi_info(self, object_id: str, refresh: bool = False) -> dict[str, Any]:
         """Deprecated: use get_device(). Returns dict for HA compatibility."""
         device = await self.get_device(object_id, refresh=refresh)
